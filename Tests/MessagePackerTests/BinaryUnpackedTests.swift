@@ -25,4 +25,11 @@ class BinaryUnpackedTests: XCTestCase {
         let output = Data([0, 1, 2, 3, 4])
         XCTAssertEqual(try decoder.decode(Data.self, from: input), output)
     }
+
+    func testLenientStringAsBinary() {
+		// try parsing old data encoded as "raw" (raw markers have become string markers and binary markers use other values now)
+        let input = Data([165, 0, 1, 2, 3, 4])
+        let output = Data([0, 1, 2, 3, 4])
+        XCTAssertEqual(try decoder.decode(Data.self, from: input), output)
+    }
 }

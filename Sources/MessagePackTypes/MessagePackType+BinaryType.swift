@@ -110,7 +110,17 @@ extension MessagePackType.BinaryType {
     static func unpack(for value: Data) throws -> Data {
         guard let firstByte = value.first else { throw MessagePackError.emptyData }
 
-        let type = try MessagePackType.BinaryType(firstByte)
-        return try value.subdata(type.dataRange(value))
+        if let type = try? MessagePackType.BinaryType(firstByte) {
+            return try value.subdata(type.dataRange(value))
+        } else {
+            // try unpacking as string as a fallback:
+            // old versions of MessagePack only had
+            // raw type meant to represent strings and binary data, and
+            // raw format markers later become string markers
+            let type = try MessagePackType.StringType(firstByte)
+            let dataRange = try type.dataRange(value)
+            return try value.subdata(dataRange)
+        }
     }
 }
+

@@ -358,7 +358,11 @@ extension MessagePackDecoder {
 
         mutating func decodeNil() throws -> Bool {
             try validateIndex(Data?.self)
-            return decoder.unboxNil(container[currentIndex])
+            let foundNil = decoder.unboxNil(container[currentIndex])
+            if foundNil {
+                currentIndex += 1
+            }
+            return foundNil
         }
 
         mutating func decode(_ type: Bool.Type) throws -> Bool {
@@ -566,6 +570,7 @@ extension MessagePackDecoder {
         }
     }
 }
+
 
 
 

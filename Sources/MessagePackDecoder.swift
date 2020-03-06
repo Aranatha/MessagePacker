@@ -101,12 +101,18 @@ private extension MessagePackDecoder {
     }
 
     func unboxInteger<T: BinaryInteger & MessagePackable>(_ value: Data, as type: T.Type) throws -> T where T.T == T {
-        if let firstByte = value.first,
-            let _ = try? MessagePackType.UnsignedIntegerType(firstByte) {
-            return T(try unboxMessagePack(value, as: UInt.self))
-        } else {
-            return try unboxMessagePack(value, as: type)
+		if let firstByte = value.first {
+			if type.isSigned {
+				if let _ = try? MessagePackType.SignedIntegerType(firstByte) {
+					return T(try unboxMessagePack(value, as: Int.self))
+				}
+			} else {
+				if let _ = try? MessagePackType.UnsignedIntegerType(firstByte) {
+					return T(try unboxMessagePack(value, as: UInt.self))
+				}
+			}
         }
+		return try unboxMessagePack(value, as: type)
     }
 
     func unbox<T: Decodable>(_ value: Data, as type: T.Type) throws -> T {
